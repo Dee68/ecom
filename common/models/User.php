@@ -5,7 +5,13 @@ use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 use yii\web\IdentityInterface;
+use backend\models\Role;
+use backend\models\Status;
+use backend\models\UserType;
+use frontend\models\Profile;
 
 /**
  * User model
@@ -23,7 +29,7 @@ use yii\web\IdentityInterface;
  */
 class User extends ActiveRecord implements IdentityInterface
 {
-    const STATUS_DELETED = 0;
+    //const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
 
 
@@ -43,6 +49,16 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             TimestampBehavior::className(),
         ];
+       /*  return [
+          'timestamp'=>[
+            'class'=>'yii\behaviors\TimestampBehavior',
+            'attributes'=>[
+              ActiveRecord::EVENT_BEFORE_INSERT=>['created_at','updated_at'],
+              ActiveRecord::EVENT_BEFORE_UPDATE=>['updated_at'],
+              'value'=> new Expression('NOW()'),
+            ],
+          ]
+        ];*/
     }
 
     /**
@@ -50,18 +66,48 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function rules()
     {
-        return [
+       /* return [
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
+        ];*/
+        return [
+          ['status_id','default','value'=>self::STATUS_ACTIVE],
+          [['status_id'],'in', 'range'=>array_keys($this->getStatusList())],
+          ['role_id','default','value'=>10],
+          [['role_id'],'in','range'=>array_keys($this->getRoleList())],
+          ['user_type_id','default','value'=>10],
+          [['user_type_id'],'in','range'=>array_keys($this->getUserTypeList())],
+          ['username','filter','filter'=>'trim'],
+          ['username','required'],
+          ['username','unique'],
+          ['username','string','min'=>2,'max'=>255],
+          ['email','filter','filter'=>'trim'],
+          ['email','required'],
+          ['email','unique'],
+          ['email','email'],
         ];
     }
-
+    public function attributeLabels() {
+        //parent::attributeLabels();
+        return [
+        /* other attribut labels */
+        'roleName' => Yii::t('app', 'Role'),
+        'statusName' => Yii::t('app', 'Status'),
+        'profileId' => Yii::t('app', 'Profile'),
+       'profileLink' => Yii::t('app', 'Profile'),
+        'userLink' => Yii::t('app', 'User'),
+       'username' => Yii::t('app', 'User'),
+       'userTypeName' => Yii::t('app', 'User Type'),
+       'userTypeId' => Yii::t('app', 'User Type'),
+      'userIdLink' => Yii::t('app', 'ID'),
+      ];
+    }
     /**
      * @inheritdoc
      */
     public static function findIdentity($id)
     {
-        return static::findOne(['id' => $id, 'status' => self::STATUS_ACTIVE]);
+        return static::findOne(['id' => $id, 'status_id' => self::STATUS_ACTIVE]);
     }
 
     /**
@@ -80,7 +126,7 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public static function findByUsername($username)
     {
-        return static::findOne(['username' => $username, 'status' => self::STATUS_ACTIVE]);
+        return static::findOne(['username' => $username, 'status_id' => self::STATUS_ACTIVE]);
     }
 
     /**
@@ -97,7 +143,7 @@ class User extends ActiveRecord implements IdentityInterface
 
         return static::findOne([
             'password_reset_token' => $token,
-            'status' => self::STATUS_ACTIVE,
+            'status_id' => self::STATUS_ACTIVE,
         ]);
     }
 
@@ -185,5 +231,94 @@ class User extends ActiveRecord implements IdentityInterface
     public function removePasswordResetToken()
     {
         $this->password_reset_token = null;
+    }
+    /**
+    *@gets the role of a user
+    */
+    public function getRole()
+    {
+      return $this->hasOne(Role::className(),['role_value'=>'role_id']);
+    }
+    /**
+    *@get role_name
+    */
+    public function getRoleName()
+    {
+      return $this->role ? $this->role->role_name : '_ no role _';
+    }
+    /**
+    *@get list of dropdown for roles
+    */
+    public function getRoleList()
+    {
+      $droptions = Role::find()->asArray()->all();
+      return Arrayhelper::map($droptions,'role_value','role_name');
+    }
+    /**
+    *@gets status of a user
+    */
+    public function getStatus()
+    {
+      return $this->hasOne(Status::className(),['status_value'=>'status_id']);
+    }
+    /**
+    *@get status name
+    */
+    public function getStatusName()
+    {
+      return $this->status ? $this->status->status_name : '_ no status _';
+    }
+    /**
+    *@ get dropdown list of statuses
+    */
+    public function getStatusList()
+    {
+      $droptions = Status::find()->asArray()->all();
+      return Arrayhelper::map($droptions,'status_value','status_name');
+    }
+    /**
+    *@ gets the usertype
+    */
+    public function getUserType()
+    {
+      return $this->hasOne(UserType::className(),['user_type_value'=>'user_type_id']);
+    }
+    /**
+    *@ gets user type name
+    */
+    public function getUserTypeName()
+    {
+      return $this->userType ? $this->userType->user_type_name : '_ no user type _';
+    }
+    /**
+    *@ gets the user type in a dropdown list
+    */
+    public function getUserTypeList()
+    {
+      $droptions = UserType::find()->asArray()->all();
+      return Arrayhelper::map($droptions,'user_type_value','user_type_name');
+    }
+    /*
+    *@ entails the relationship btw the user&profile tables
+    */
+    public function getProfile()
+    {
+      return $this->hasOne(Profile::className(), ['user_id' => 'id']);
+    }
+    /**
+    *@ get profile id
+    */
+    public function getProfileId()
+    {
+     return $this->profile ? $this->profile->id : 'none';
+    }
+    /**
+    *@ gets profile link
+    */
+    public function getProfileLink()
+    {
+     $url = Url::to(['profile/view', 'id'=>$this->profileId]);
+     $options = [];
+     return Html::a($this->profile ? 'profile' : 'none', $url, $options);
     }
 }

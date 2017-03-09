@@ -14,10 +14,10 @@ class m170309_094428_create_profile extends Migration
          'id' =>$this->primaryKey(),
          'user_id' =>$this->integer()->notNull(),
          'gender_id' =>$this->integer()->notNull(),
-         'firstname' =>$this->string()->notNull(),
-         'lastname' =>$this->string()->notNull(),
-         'created_at' =>$this->dateTime(),
-         'updated_at' =>$this->dateTime(),
+         'firstname' =>$this->string(30)->notNull(),
+         'lastname' =>$this->string(30)->notNull(),
+         'created_at' =>$this->integer(11),
+         'updated_at' =>$this->integer(11),
          'avatar' =>$this->string()
      ], $tableOptions);
      //create index user_id

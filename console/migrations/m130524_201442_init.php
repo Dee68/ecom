@@ -23,8 +23,8 @@ class m130524_201442_init extends Migration
             'status_id' => $this->smallInteger()->notNull()->defaultValue(10),
             'role_id' => $this->smallInteger()->notNull()->defaultValue(10),
             'user_type_id' => $this->smallInteger()->notNull()->defaultValue(10),
-            'created_at' => $this->dateTime()->notNull(),
-            'updated_at' => $this->dateTime()->notNull(),
+            'created_at' => $this->integer(11),
+            'updated_at' => $this->integer(11),
         ], $tableOptions);
         //create index for status_id
         $this->createIndex(

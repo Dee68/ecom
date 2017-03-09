@@ -3,6 +3,7 @@ namespace common\models;
 
 use Yii;
 use yii\base\Model;
+use yii\web\NotFoundHttpException;
 
 /**
  * Login form
@@ -55,12 +56,28 @@ class LoginForm extends Model
      */
     public function login()
     {
-        if ($this->validate()) {
+        if ($this->validate() && $this->getUser()->status_id == ValueHelpers::getStatusValue('Active')) {
             return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
         } else {
             return false;
         }
     }
+    /**
+    *@ logs in a user in the RBAC using the provided username & password + role
+    * & permissions
+    * @return boolean wether the user is logged in successfully
+    */
+   public function loginAdmin()
+   {
+       if($this->validate() 
+        && $this->getUser()->role_id >= ValueHelpers::getRoleValue('manager') && 
+        $this->getUser()->status_id == ValueHelpers::getStatusValue('Active'))
+       {
+         return Yii:: $app->user->login($this->getUser(),  $this->rememberMe ? 3600*24*30:0); 
+       }  else {
+           throw new NotFoundHttpException("Access Prohibited");
+       }
+   }
 
     /**
      * Finds user by [[username]]
