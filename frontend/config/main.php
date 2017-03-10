@@ -44,6 +44,13 @@ return [
             ],
         ],
         */
+        'view'=> [
+            'theme' =>[
+               'pathMap'=>[
+                   '@app/views'=>'@frontend/themes/dee/views'
+               ] 
+            ]
+        ]
     ],
     'params' => $params,
 ];
