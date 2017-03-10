@@ -1,0 +1,3 @@
+[0310/153512.773:ERROR:crash_report_database_win.cc(563)] CreateDirectory C:\Program Files (x86)\Footper\reports: Отказано в доступе. (0x5)
+[0310/153512.781:ERROR:registration_protocol_win.cc(84)] TransactNamedPipe: Канал был закрыт. (0x6D)
+[0310/153512.784:ERROR:crash_report_database_win.cc(563)] CreateDirectory C:\Program Files (x86)\Footper\reports: Отказано в доступе. (0x5)
