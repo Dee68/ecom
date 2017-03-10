@@ -1,11 +1,7 @@
 <?php
-//use yii\helpers\Html;
-//use frontend\assets\AppAsset;
 
-$asset = frontend\assets\AppAsset::register($this);
+/* @var $this yii\web\View */
 
-$baseUrl = $asset->baseUrl;
-$action = Yii::$app->controller->action->id;
 $this->title = 'My Yii Application';
 ?>
   <!-- Homepage Slider -->
